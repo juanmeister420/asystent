@@ -1,10 +1,26 @@
 {
-  "name": "react-ts",
-  "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "name": "masystent",
+  "version": "1.0.1",
+  "description": "mAsystent - Opis aplikacji",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "Firma Monkiewicz",
+  "homepage": "https://firmamonkiewicz.pl",
+  "build": {
+    "appId": "masystent.app.firma_monkiewicz",
+    "productName": "mAsystent",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "out/**/*",
+      "node_modules/**/*"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "juanmeister420",
+      "repo": "asystent"
+    }
+  },
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
@@ -26,6 +42,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "electron-updater": "^6.1.7",
     "lucide-react": "^0.333.0",
     "react-router-dom": "^6.22.1",
     "tailwind-merge": "^2.2.1",

@@ -1,29 +1,17 @@
-import { useState, useEffect } from 'react'
-import { Button } from '@renderer/shadcn/components/ui/button'
+import { useEffect, useState } from 'react'
 
 function App(): JSX.Element {
-  const [width, setWidth] = useState(window.innerWidth)
-  const [height, setHeight] = useState(window.innerHeight)
+  const [updateMessage, setUpdateMessage] = useState('Sprawdzanie aktualizacji...')
 
-  useEffect(() => {
-    const handleResize = () => {
-      setWidth(window.innerWidth)
-      setHeight(window.innerHeight)
-    }
-
-    window.addEventListener('resize', handleResize)
-
-    return () => {
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [])
   return (
-    <>
-      <h1 className="text-3xl font-bold underline text-green-600">
-        width: {width} height: {height}
-      </h1>
-      <Button variant="default">Primary</Button>
-    </>
+    <div className="w-screen h-screen bg-orange-50 flex text-center items-center">
+      <div className="text-6xl font-semibold text-neutral-800 w-full flex flex-col gap-5">
+        <div className="">
+          <span className="text-orange-600">m</span>Asystent
+        </div>
+        <p className="text-xl font-normal text-neutral-800">{updateMessage}</p>
+      </div>
+    </div>
   )
 }
 
