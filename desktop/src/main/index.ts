@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, ipcRenderer } from 'electron'
+import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -24,6 +24,34 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+
+    mainWindow.webContents.send('auto-update', 'Checking for updates...')
+
+    autoUpdater.checkForUpdatesAndNotify()
+
+    // Auto-update events
+    autoUpdater.on('update-available', () => {
+      mainWindow.webContents.send('auto-update', 'Update available. Downloading...')
+    })
+
+    autoUpdater.on('update-not-available', () => {
+      mainWindow.webContents.send('auto-update', 'Current version is up-to-date.')
+    })
+
+    autoUpdater.on('update-downloaded', () => {
+      mainWindow.webContents.send(
+        'auto-update',
+        'Update downloaded. It will be installed on restart.'
+      )
+
+      setTimeout(() => {
+        autoUpdater.quitAndInstall()
+      }, 3000)
+    })
+
+    autoUpdater.on('error', (error) => {
+      mainWindow.webContents.send('auto-update', `Update error: ${error.toString()}`)
+    })
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -31,8 +59,6 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -40,9 +66,6 @@ function createWindow(): void {
   }
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('masystent.app.firma_monkiewicz')
 

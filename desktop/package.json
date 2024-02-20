@@ -1,6 +1,6 @@
 {
   "name": "masystent",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "mAsystent - Opis aplikacji",
   "main": "./out/main/index.js",
   "author": "Firma Monkiewicz",
@@ -19,6 +19,9 @@
       "provider": "github",
       "owner": "juanmeister420",
       "repo": "asystent"
+    },
+    "win": {
+      "artifactName": "${productName}-Instalator-${version}.${ext}"
     }
   },
   "scripts": {
