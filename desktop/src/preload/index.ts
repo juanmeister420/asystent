@@ -11,7 +11,7 @@ const secureApi = {
   },
   receive: (channel, func) => {
     // List of channels you allow the renderer process to receive messages from
-    const validChannels = ['auto-update']
+    const validChannels = ['auto-update', 'auto-update-progress']
     if (validChannels.includes(channel)) {
       // Remove existing listener to avoid duplicates
       ipcRenderer.removeAllListeners(channel)

@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, globalShortcut } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -25,28 +25,29 @@ function createWindow(): void {
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
 
-    mainWindow.webContents.send('auto-update', 'Checking for updates...')
+    mainWindow.webContents.send('auto-update', 'checking-for-update')
 
     autoUpdater.checkForUpdatesAndNotify()
 
     // Auto-update events
     autoUpdater.on('update-available', () => {
-      mainWindow.webContents.send('auto-update', 'Update available. Downloading...')
+      mainWindow.webContents.send('auto-update', 'update-available')
     })
 
     autoUpdater.on('update-not-available', () => {
-      mainWindow.webContents.send('auto-update', 'Current version is up-to-date.')
+      mainWindow.webContents.send('auto-update', 'update-not-available')
     })
 
     autoUpdater.on('update-downloaded', () => {
-      mainWindow.webContents.send(
-        'auto-update',
-        'Update downloaded. It will be installed on restart.'
-      )
+      mainWindow.webContents.send('auto-update', 'update-downloaded')
 
       setTimeout(() => {
         autoUpdater.quitAndInstall()
-      }, 3000)
+      }, 2000)
+    })
+
+    autoUpdater.on('download-progress', (progress) => {
+      mainWindow.webContents.send('auto-update-progress', progress.percent.toFixed(2))
     })
 
     autoUpdater.on('error', (error) => {
@@ -62,7 +63,7 @@ function createWindow(): void {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadURL(`file://${join(__dirname, '../renderer/index.html')}`)
   }
 }
 
@@ -75,9 +76,20 @@ app.whenReady().then(() => {
 
   createWindow()
 
+  globalShortcut.register('CommandOrControl+Shift+I', () => {
+    const focusedWindow = BrowserWindow.getFocusedWindow()
+    if (focusedWindow) {
+      focusedWindow.webContents.openDevTools()
+    }
+  })
+
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll()
 })
 
 app.on('window-all-closed', () => {
