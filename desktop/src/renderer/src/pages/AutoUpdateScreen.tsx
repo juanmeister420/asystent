@@ -26,6 +26,10 @@ function AutoUpdateScreen(): JSX.Element {
         case 'update-not-available':
           setUpdateMessage(update_messages[message])
           setTimeout(() => {
+            // Send IPC message to resize window before navigating
+            if (window.api && typeof window.api.send === 'function') {
+              window.api.send('resize', { width: 1200, height: 900 }) // Adjust width and height as needed
+            }
             navigate('/home')
           }, 3000)
           break
@@ -58,14 +62,14 @@ function AutoUpdateScreen(): JSX.Element {
         <div className="">
           <span className="text-orange-600">m</span>Asystent
         </div>
-        <p className="text-xl font-normal text-neutral-800">{updateMessage}</p>
+        <p className="text-xl font-normal text-neutral-400">{updateMessage}</p>
         {showProgress && (
-          <div className="w-1/5 mx-auto text-xl">
+          <div className="w-1/3 mx-auto text-xl">
             <Progress
               className="w-full bg-transparent border-2 border-orange-600"
               value={progress}
             />
-            {progress}%
+            <span className="text-neutral-400">{progress}%</span>
           </div>
         )}
       </div>

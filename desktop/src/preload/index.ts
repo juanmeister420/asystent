@@ -4,14 +4,14 @@ import { contextBridge, ipcRenderer } from 'electron'
 const secureApi = {
   send: (channel, data) => {
     // List of channels you allow the renderer process to send messages to
-    const validChannels = ['auto-update']
+    const validChannels = ['resize']
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data)
     }
   },
   receive: (channel, func) => {
     // List of channels you allow the renderer process to receive messages from
-    const validChannels = ['auto-update', 'auto-update-progress']
+    const validChannels = ['auto-update', 'auto-update-progress', 'resize']
     if (validChannels.includes(channel)) {
       // Remove existing listener to avoid duplicates
       ipcRenderer.removeAllListeners(channel)
