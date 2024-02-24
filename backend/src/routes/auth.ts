@@ -1,91 +1,124 @@
 import { PrismaClient } from "@prisma/client";
-import { Application } from "express";
 import { compare, hash } from "bcrypt";
-import { expressjwt, Request as JWTRequest } from "express-jwt";
-import { sign } from "jsonwebtoken";
+import { Application, Request, Response } from "express";
 
-const BCRYPT_SALT_ROUNDS = 10;
+import { sign } from "jsonwebtoken";
+import { body, validationResult } from "express-validator";
+
+const BCRYPT_SALT_ROUNDS = 12;
 
 module.exports = (app: Application, prisma: PrismaClient) => {
-  app.post("/auth/register", async (req, res) => {
-    const { email, password, nip } = req.body;
-
-    try {
-      // Hash the password
-      const hashedPassword = await hash(password, BCRYPT_SALT_ROUNDS);
-
-      // Create new account in the database
-      const newAccount = await prisma.accounts.create({
-        data: {
-          email,
-          password: hashedPassword,
-          nip,
-          role: "admin",
-        },
-      });
-
-      // Respond with created account (excluding password)
-      res.json({
-        id: newAccount.id,
-        email: newAccount.email,
-        nip: newAccount.nip,
-        creation_date: newAccount.creation_date,
-      });
-    } catch (error) {
-      console.error("Registration error:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
-
-  app.post("/auth/login", async (req, res) => {
-    const { email, password } = req.body;
-
-    try {
-      // Find account by email
-      const account = await prisma.accounts.findUnique({
-        where: { email },
-      });
-
-      if (!account) {
-        return res.status(401).json({ error: "Invalid email or password" });
+  app.post(
+    "/auth/register",
+    [
+      body("nip")
+        .isInt()
+        .isLength({ min: 10, max: 10 })
+        .withMessage("Numer NIP musi składać się z 10 cyfr."),
+      body("email").isEmail().withMessage("Email is not valid"),
+      body("password")
+        .isLength({ min: 8 })
+        .withMessage("Password must be at least 8 characters long"),
+    ],
+    async (req: Request, res: Response) => {
+      // Check for validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
       }
 
-      // Compare password
-      const passwordMatch = await compare(password, account.password);
+      const { nip, email, password } = req.body;
 
-      if (!passwordMatch) {
-        return res.status(401).json({ error: "Invalid password" });
+      try {
+        const existingUser = await prisma.accounts.findFirst({
+          where: {
+            OR: [{ nip }, { email }],
+          },
+        });
+
+        if (existingUser) {
+          return res.status(409).json({
+            message: "User with the same NIP or email already exists",
+          });
+        }
+
+        const hashedPassword = await hash(password, BCRYPT_SALT_ROUNDS);
+
+        const newUser = await prisma.accounts.create({
+          data: {
+            email,
+            password: hashedPassword,
+            nip,
+            role: "admin",
+          },
+        });
+
+        res
+          .status(201)
+          .json({ message: "User registered successfully", user: newUser });
+      } catch (error: any) {
+        res.status(500).json({ message: "Server error", error: error.message });
+      }
+    }
+  );
+
+  app.post(
+    "/auth/login",
+    [
+      body("email").isEmail().withMessage("Email is not valid"),
+      body("password")
+        .isLength({ min: 8 })
+        .withMessage("Password must be at least 8 characters long"),
+    ],
+    async (req: Request, res: Response) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
       }
 
-      // Create JWT token
-      const refreshToken = await sign(
-        { id: account.id },
-        process.env.JWT_SECRET_KEY as string,
-        {
-          expiresIn: "365d",
+      const { email, password } = req.body;
+
+      try {
+        const user = await prisma.accounts.findUnique({
+          where: {
+            email,
+          },
+        });
+
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
         }
-      );
 
-      await prisma.accounts.update({
-        where: { id: account.id },
-        data: {
-          refresh_token: refreshToken,
-        },
-      });
-
-      const token = await sign(
-        { id: account.id },
-        process.env.JWT_SECRET_KEY as string,
-        {
-          expiresIn: "7d",
+        // Compare password
+        const isMatch = await compare(password, user.password);
+        if (!isMatch) {
+          return res.status(400).json({ message: "Invalid credentials" });
         }
-      );
 
-      // Respond with token
-      res.json({ token, refreshToken });
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ error: "Internal server error" });
+        // Generate JWT token
+        const accessToken = sign(
+          { userId: user.id, email: user.email },
+          process.env.SECRET_KEY_JWT as string,
+          { expiresIn: "30d" } // 30 days
+        );
+
+        // Generate Refresh Token
+        const refreshToken = sign(
+          { userId: user.id, email: user.email },
+          process.env.SECRET_KEY_JWT as string,
+          { expiresIn: "365d" } // 1 year
+        );
+
+        // You can store refreshToken in your DB if you want to manage logout/refresh
+        await prisma.accounts.update({
+          where: { id: user.id },
+          data: { refresh_token: refreshToken },
+        });
+
+        res.status(200).json({ accessToken, refreshToken });
+      } catch (error: any) {
+        res.status(500).json({ message: "Server error", error: error.message });
+      }
     }
-  });
+  );
 };

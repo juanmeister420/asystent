@@ -30,7 +30,7 @@ function AutoUpdateScreen(): JSX.Element {
             if (window.api && typeof window.api.send === 'function') {
               window.api.send('resize', { width: 1200, height: 900 }) // Adjust width and height as needed
             }
-            navigate('/home')
+            navigate('/login', { replace: true })
           }, 3000)
           break
         default:
