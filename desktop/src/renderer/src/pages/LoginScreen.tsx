@@ -1,5 +1,5 @@
-import { buttonVariants, Button } from '@renderer/shadcn/components/ui/button'
-import { cn } from '@renderer/shadcn/components/ui/utils'
+import { Button } from '@renderer/shadcn/components/ui/button'
+
 import { Link, useNavigate } from 'react-router-dom'
 
 import { ChevronsRight, Loader, MonitorCheck } from 'lucide-react'
@@ -12,13 +12,13 @@ import { useForm } from 'react-hook-form'
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage
 } from '@renderer/shadcn/components/ui/form'
 import instance from '@renderer/lib/axios'
+import { useAuth } from '@renderer/lib/authContext'
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Nieprawidłowy adres email.' }), // Custom message for email validation
@@ -29,6 +29,7 @@ export default function AuthenticationPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { setUserData } = useAuth()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,14 +40,14 @@ export default function AuthenticationPage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log('Submitted values:', values)
     await setLoading(true)
     try {
       const response = await instance.post('/auth/login', values)
       if (response.status === 200) {
         localStorage.setItem('token', response.data.accessToken)
+        await setUserData(response.data.user)
         await setLoading(false)
-        navigate('/home', { replace: true })
+        await navigate('/home', { replace: true })
       } else {
         await setLoading(false)
         await setError(response.data.message || 'Wystąpił błąd. Spróbuj ponownie.')

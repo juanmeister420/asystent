@@ -13,6 +13,7 @@ interface decodedToken {
 module.exports = (app: Application, prisma: PrismaClient) => {
   app.get("/auth/verify", async (req: Request, res: Response) => {
     const token = req.headers.authorization?.split(" ")[1];
+    console.log("Starting verification " + Date.now());
     if (!token) {
       return res.status(401).json({ message: "Token missing" });
     }

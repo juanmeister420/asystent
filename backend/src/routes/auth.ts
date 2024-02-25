@@ -115,7 +115,14 @@ module.exports = (app: Application, prisma: PrismaClient) => {
           data: { refresh_token: refreshToken },
         });
 
-        res.status(200).json({ accessToken });
+        res.status(200).json({
+          accessToken,
+          user: {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+          },
+        });
       } catch (error: any) {
         res.status(500).json({ message: "Server error", error: error.message });
       }

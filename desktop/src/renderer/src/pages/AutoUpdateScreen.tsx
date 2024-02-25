@@ -1,4 +1,4 @@
-import instance from '@renderer/lib/axios'
+import { useAuth } from '@renderer/lib/authContext'
 import { Progress } from '@renderer/shadcn/components/ui/progress'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -14,8 +14,18 @@ function AutoUpdateScreen(): JSX.Element {
   const [updateMessage, setUpdateMessage] = useState('...')
   const [progress, setProgress] = useState(0)
   const [showProgress, setShowProgress] = useState(false)
+  const [updateRequestSent, setUpdateRequestSent] = useState(false)
 
   const navigate = useNavigate()
+  const { userData } = useAuth()
+
+  async function navigateAfterCheck() {
+    if (userData) {
+      navigate('/home', { replace: true })
+    } else {
+      navigate('/login', { replace: true })
+    }
+  }
 
   const handleUpdateMessage = (message: string) => {
     switch (message) {
@@ -25,14 +35,13 @@ function AutoUpdateScreen(): JSX.Element {
         break
       case 'update-not-available':
         setUpdateMessage(update_messages[message])
-        setTimeout(() => {
+        setTimeout(async () => {
           // Send IPC message to resize window before navigating
           if (window.api && typeof window.api.send === 'function') {
             window.api.send('resize', { width: 1200, height: 900 }) // Adjust width and height as needed
           }
-
-          navigate('/login', { replace: true })
-        }, 3000)
+          navigateAfterCheck()
+        }, 1500)
         break
       default:
         setUpdateMessage(update_messages[message] || message)
@@ -43,7 +52,17 @@ function AutoUpdateScreen(): JSX.Element {
     setProgress(progress)
   }
 
+  function sendUpdateRequest() {
+    if (updateRequestSent) return
+    if (window.api && typeof window.api.send === 'function') {
+      setUpdateRequestSent(true)
+
+      window.api.send('auto-update-start', null)
+    }
+  }
   useEffect(() => {
+    sendUpdateRequest()
+
     if (window.api && typeof window.api.receive === 'function') {
       window.api.receive('auto-update', handleUpdateMessage)
       window.api.receive('auto-update-progress', handleProgressUpdate)
