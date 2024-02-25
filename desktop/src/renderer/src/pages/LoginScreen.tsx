@@ -1,11 +1,63 @@
 import { buttonVariants, Button } from '@renderer/shadcn/components/ui/button'
 import { cn } from '@renderer/shadcn/components/ui/utils'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
-import { MonitorCheck } from 'lucide-react'
+import { ChevronsRight, Loader, MonitorCheck } from 'lucide-react'
 import { useState } from 'react'
+import { Input } from '@renderer/shadcn/components/ui/input'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@renderer/shadcn/components/ui/form'
+import instance from '@renderer/lib/axios'
+
+const formSchema = z.object({
+  email: z.string().email({ message: 'Nieprawidłowy adres email.' }), // Custom message for email validation
+  password: z.string().min(8, { message: 'Hasło musi mieć przynajmniej 8 znaków.' }) // Custom message for minimum length validation
+})
 
 export default function AuthenticationPage() {
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: ''
+    }
+  })
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log('Submitted values:', values)
+    await setLoading(true)
+    try {
+      const response = await instance.post('/auth/login', values)
+      if (response.status === 200) {
+        localStorage.setItem('token', response.data.accessToken)
+        await setLoading(false)
+        navigate('/home', { replace: true })
+      } else {
+        await setLoading(false)
+        await setError(response.data.message || 'Wystąpił błąd. Spróbuj ponownie.')
+      }
+    } catch (error: any) {
+      await setLoading(false)
+      await setError(error.response?.data?.message || 'Wystąpił błąd. Spróbuj ponownie.')
+      console.error(error)
+    }
+  }
+
   return (
     <div className="relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col bg-muted p-10 text-orange-600 dark:border-r lg:flex">
@@ -40,10 +92,61 @@ export default function AuthenticationPage() {
           <div className="flex flex-col space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">Zaloguj Się</h1>
             <p className="text-sm text-muted-foreground">
-              Wpisz poniżej swój adres email, aby kontynuować.
+              Aby w pełni korzystać z systemu, należy posiadać konto.
             </p>
           </div>
-          {/* LOGIN FORM HERE */}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Adres Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="przykład: jan@kowalski.pl"
+                        {...field}
+                        disabled={loading}
+                      />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hasło</FormLabel>
+                    <FormControl>
+                      <Input placeholder="********" {...field} type="password" disabled={loading} />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader className="mr-2 h-4 w-4 animate-spin" /> Ładowanie
+                  </>
+                ) : (
+                  <>
+                    <ChevronsRight className="mr-2 h-4 w-4" /> Kontynuuj
+                  </>
+                )}
+              </Button>
+              {error && (
+                <p className="text-sm text-red-500 text-center" role="alert">
+                  {error}
+                </p>
+              )}
+            </form>
+          </Form>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />

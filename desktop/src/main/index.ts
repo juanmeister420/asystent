@@ -17,6 +17,9 @@ class MainWindow {
     this.mainWindow = new BrowserWindow({
       width: 600,
       height: 600,
+      minWidth: 600,
+      minHeight: 600,
+
       show: false,
       autoHideMenuBar: true,
       icon: process.platform === 'linux' ? icon : undefined,

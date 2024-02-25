@@ -2,12 +2,14 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import express from "express";
 import { readdirSync } from "fs";
 import helmet from "helmet";
+import cors from "cors";
 
 const prisma = new PrismaClient();
 const app = express();
 
 app.use(express.json());
 app.use(helmet());
+app.use(cors());
 
 readdirSync(`${__dirname}/routes`).map(async (file) => {
   if (file.endsWith(".ts")) {

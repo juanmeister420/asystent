@@ -97,15 +97,15 @@ module.exports = (app: Application, prisma: PrismaClient) => {
 
         // Generate JWT token
         const accessToken = sign(
-          { userId: user.id, email: user.email },
+          { id: user.id },
           process.env.SECRET_KEY_JWT as string,
           { expiresIn: "30d" } // 30 days
         );
 
         // Generate Refresh Token
         const refreshToken = sign(
-          { userId: user.id, email: user.email },
-          process.env.SECRET_KEY_JWT as string,
+          { id: user.id },
+          process.env.SECRET_KEY_REFRESH as string,
           { expiresIn: "365d" } // 1 year
         );
 
@@ -115,7 +115,7 @@ module.exports = (app: Application, prisma: PrismaClient) => {
           data: { refresh_token: refreshToken },
         });
 
-        res.status(200).json({ accessToken, refreshToken });
+        res.status(200).json({ accessToken });
       } catch (error: any) {
         res.status(500).json({ message: "Server error", error: error.message });
       }

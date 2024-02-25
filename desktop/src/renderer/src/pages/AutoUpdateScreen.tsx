@@ -1,6 +1,14 @@
+import instance from '@renderer/lib/axios'
 import { Progress } from '@renderer/shadcn/components/ui/progress'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+const update_messages = {
+  'checking-for-update': 'Sprawdzanie dostępności aktualizacji...',
+  'update-available': 'Aktualizacja jest dostępna. Trwa pobieranie...',
+  'update-not-available': 'Aplikacja jest aktualna. Trwa uruchamianie...',
+  'update-downloaded': 'Aktualizacja pobrana, instalowanie...'
+}
 
 function AutoUpdateScreen(): JSX.Element {
   const [updateMessage, setUpdateMessage] = useState('...')
@@ -9,39 +17,33 @@ function AutoUpdateScreen(): JSX.Element {
 
   const navigate = useNavigate()
 
-  const update_messages = {
-    'checking-for-update': 'Sprawdzanie dostępności aktualizacji...',
-    'update-available': 'Aktualizacja jest dostępna. Trwa pobieranie...',
-    'update-not-available': 'Aplikacja jest aktualna. Trwa uruchamianie...',
-    'update-downloaded': 'Aktualizacja pobrana, instalowanie...'
+  const handleUpdateMessage = (message: string) => {
+    switch (message) {
+      case 'update-available':
+        setUpdateMessage(update_messages[message])
+        setShowProgress(true)
+        break
+      case 'update-not-available':
+        setUpdateMessage(update_messages[message])
+        setTimeout(() => {
+          // Send IPC message to resize window before navigating
+          if (window.api && typeof window.api.send === 'function') {
+            window.api.send('resize', { width: 1200, height: 900 }) // Adjust width and height as needed
+          }
+
+          navigate('/login', { replace: true })
+        }, 3000)
+        break
+      default:
+        setUpdateMessage(update_messages[message] || message)
+    }
+  }
+
+  const handleProgressUpdate = (progress: number) => {
+    setProgress(progress)
   }
 
   useEffect(() => {
-    const handleUpdateMessage = (message: string) => {
-      switch (message) {
-        case 'update-available':
-          setUpdateMessage(update_messages[message])
-          setShowProgress(true)
-          break
-        case 'update-not-available':
-          setUpdateMessage(update_messages[message])
-          setTimeout(() => {
-            // Send IPC message to resize window before navigating
-            if (window.api && typeof window.api.send === 'function') {
-              window.api.send('resize', { width: 1200, height: 900 }) // Adjust width and height as needed
-            }
-            navigate('/login', { replace: true })
-          }, 3000)
-          break
-        default:
-          setUpdateMessage(update_messages[message] || message)
-      }
-    }
-
-    const handleProgressUpdate = (progress: number) => {
-      setProgress(progress)
-    }
-
     if (window.api && typeof window.api.receive === 'function') {
       window.api.receive('auto-update', handleUpdateMessage)
       window.api.receive('auto-update-progress', handleProgressUpdate)
