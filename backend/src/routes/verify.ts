@@ -13,7 +13,7 @@ interface decodedToken {
 module.exports = (app: Application, prisma: PrismaClient) => {
   app.get("/auth/verify", async (req: Request, res: Response) => {
     const token = req.headers.authorization?.split(" ")[1];
-    console.log("Starting verification " + Date.now());
+
     if (!token) {
       return res.status(401).json({ message: "Token missing" });
     }
@@ -40,6 +40,13 @@ module.exports = (app: Application, prisma: PrismaClient) => {
       if (!user) {
         return res.status(401).json({ message: "No user Found" });
       }
+      console.log({
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        },
+      });
 
       return res.status(200).json({
         message: "Authorized",
@@ -50,7 +57,10 @@ module.exports = (app: Application, prisma: PrismaClient) => {
         },
       });
     } catch (error: any) {
-      console.log(error);
+      if (error.name === "JsonWebTokenError") {
+        return res.status(401).json({ message: "Token is not valid" });
+      }
+
       return res.status(500).json({ message: "There's an error" });
     }
   });

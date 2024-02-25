@@ -1,6 +1,6 @@
 {
   "name": "masystent",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "mAsystent - Opis aplikacji",
   "main": "./out/main/index.js",
   "author": "Firma Monkiewicz",
@@ -43,6 +43,7 @@
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
     "@hookform/resolvers": "^3.3.4",
+    "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-progress": "^1.0.3",
     "@radix-ui/react-slot": "^1.0.2",

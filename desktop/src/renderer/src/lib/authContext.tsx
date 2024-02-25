@@ -2,6 +2,7 @@ import { ReactElement, ReactNode, createContext, useContext, useEffect, useState
 import instance from './axios'
 import { useNavigate } from 'react-router-dom'
 import { Loader } from 'lucide-react'
+import { Button } from '@renderer/shadcn/components/ui/button'
 
 export interface userDataType {
   id: string
@@ -24,12 +25,16 @@ export const AuthContext = createContext<authContextType>({
 export const useAuth = () => useContext(AuthContext)
 
 interface AuthProviderProps {
-  children: ReactNode // Dodanie definicji dla children
+  children: ReactNode
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }): ReactElement => {
   const [userData, setUserData] = useState<userDataType | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState({
+    status: false,
+    message: ''
+  })
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -39,6 +44,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }): ReactEl
         const token = localStorage.getItem('token')
         if (!token) {
           setLoading(false)
+          if (window.api && typeof window.api.send === 'function') {
+            window.api.send('resize', { width: 1200, height: 900 })
+          }
           navigate('/login', { replace: true })
           return
         }
@@ -50,10 +58,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }): ReactEl
         } else {
           localStorage.removeItem('token')
           setLoading(false)
-          navigate('/login', { replace: true })
+          if (window.api && typeof window.api.send === 'function') {
+            window.api.send('resize', { width: 1200, height: 900 })
+          }
+          navigate('/login', { replace: true, state: { verification_error: true } })
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching user info', error)
+        setError({ status: true, message: error.message })
         setLoading(false)
       }
     }
@@ -74,7 +86,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }): ReactEl
           <Loader size={48} className="animate-spin" />
         </div>
       ) : (
-        children
+        <>
+          {error.status ? (
+            <div className="flex items-center justify-center h-screen text-orange-600 bg-orange-50 flex-col gap-4">
+              <p className="text-xl font-semibold">Wystąpił błąd podczas ładowania aplikacji</p>
+              <p>{error.message}</p>
+
+              <Button onClick={() => window.location.reload()} className="w-48">
+                Spróbuj ponownie
+              </Button>
+            </div>
+          ) : (
+            children
+          )}
+        </>
       )}
     </AuthContext.Provider>
   )

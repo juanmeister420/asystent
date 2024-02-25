@@ -1,6 +1,6 @@
 import { Button } from '@renderer/shadcn/components/ui/button'
 
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { ChevronsRight, Loader, MonitorCheck } from 'lucide-react'
 import { useState } from 'react'
@@ -8,6 +8,14 @@ import { Input } from '@renderer/shadcn/components/ui/input'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@renderer/shadcn/components/ui/dialog'
 
 import {
   Form,
@@ -28,8 +36,12 @@ const formSchema = z.object({
 export default function AuthenticationPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
   const navigate = useNavigate()
   const { setUserData } = useAuth()
+  const { state } = useLocation()
+  const { verification_error } = state || { verification_error: false }
+  const [errorDialogOpen, setSetErrorDialogOpen] = useState(verification_error)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,6 +73,13 @@ export default function AuthenticationPage() {
 
   return (
     <div className="relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+      <Dialog open={errorDialogOpen} onOpenChange={setSetErrorDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Wystąpił błąd, zaloguj się ponownie.</DialogTitle>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
       <div className="relative hidden h-full flex-col bg-muted p-10 text-orange-600 dark:border-r lg:flex">
         <div className="absolute inset-0 bg-orange-100" />
         <div className="relative z-20 flex items-center text-lg font-medium">
