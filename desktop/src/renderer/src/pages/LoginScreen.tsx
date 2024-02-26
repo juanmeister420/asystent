@@ -11,10 +11,8 @@ import { useForm } from 'react-hook-form'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger
+  DialogTitle
 } from '@renderer/shadcn/components/ui/dialog'
 
 import {
@@ -38,7 +36,7 @@ export default function AuthenticationPage() {
   const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate()
-  const { setUserData } = useAuth()
+  const { setUserDataContext } = useAuth()
   const { state } = useLocation()
   const { verification_error } = state || { verification_error: false }
   const [errorDialogOpen, setSetErrorDialogOpen] = useState(verification_error)
@@ -56,8 +54,8 @@ export default function AuthenticationPage() {
     try {
       const response = await instance.post('/auth/login', values)
       if (response.status === 200) {
-        localStorage.setItem('token', response.data.accessToken)
-        await setUserData(response.data.user)
+        await localStorage.setItem('token', response.data.accessToken)
+        await setUserDataContext(response.data.user)
         await setLoading(false)
         await navigate('/home', { replace: true })
       } else {

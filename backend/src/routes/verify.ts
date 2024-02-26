@@ -40,13 +40,7 @@ module.exports = (app: Application, prisma: PrismaClient) => {
       if (!user) {
         return res.status(401).json({ message: "No user Found" });
       }
-      console.log({
-        user: {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-        },
-      });
+      console.log("Received Request");
 
       return res.status(200).json({
         message: "Authorized",
