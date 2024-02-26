@@ -23,6 +23,7 @@ class MainWindow {
       show: false,
       autoHideMenuBar: true,
       icon: process.platform === 'linux' ? icon : undefined,
+
       webPreferences: {
         preload: join(__dirname, '../preload/index.js'),
         sandbox: false
@@ -33,7 +34,7 @@ class MainWindow {
     this.mainWindow.on('ready-to-show', () => {
       if (this.mainWindow) {
         this.mainWindow.show()
-        this.autoUpdateCheck()
+        this.mainWindow.focus()
       }
     })
 
@@ -56,61 +57,57 @@ class MainWindow {
         this.resizeWindow(width, height)
       }
     })
+
+    if (is.dev) {
+      ipcMain.on('auto-update-start', () => {
+        this.mainWindow?.webContents.send('auto-update', 'update-not-available')
+      })
+      return
+    }
+    ipcMain.on('auto-update-start', () => {
+      this.mainWindow?.webContents.send('auto-update', 'checking-for-update')
+      autoUpdater.checkForUpdatesAndNotify()
+
+      autoUpdater.on('update-available', () => {
+        if (this.mainWindow) {
+          this.mainWindow.webContents.send('auto-update', 'update-available')
+        }
+      })
+
+      autoUpdater.on('update-not-available', () => {
+        if (this.mainWindow) {
+          this.mainWindow.webContents.send('auto-update', 'update-not-available')
+        }
+      })
+
+      autoUpdater.on('update-downloaded', () => {
+        if (this.mainWindow) {
+          this.mainWindow.webContents.send('auto-update', 'update-downloaded')
+
+          setTimeout(() => {
+            autoUpdater.quitAndInstall()
+          }, 2000)
+        }
+      })
+
+      autoUpdater.on('download-progress', (progress) => {
+        if (this.mainWindow) {
+          this.mainWindow.webContents.send('auto-update-progress', progress.percent.toFixed(2))
+        }
+      })
+
+      autoUpdater.on('error', (error) => {
+        if (this.mainWindow) {
+          this.mainWindow.webContents.send('auto-update', `Update error: ${error.toString()}`)
+        }
+      })
+    })
   }
 
   resizeWindow(width: number, height: number) {
     if (this.mainWindow) {
       this.mainWindow.setSize(width, height)
       this.mainWindow.center()
-    }
-  }
-
-  autoUpdateCheck() {
-    if (this.mainWindow) {
-      if (is.dev) {
-        ipcMain.on('auto-update-start', () => {
-          this.mainWindow?.webContents.send('auto-update', 'update-not-available')
-        })
-        return
-      }
-      ipcMain.on('auto-update-start', () => {
-        this.mainWindow?.webContents.send('auto-update', 'checking-for-update')
-        autoUpdater.checkForUpdatesAndNotify()
-
-        autoUpdater.on('update-available', () => {
-          if (this.mainWindow) {
-            this.mainWindow.webContents.send('auto-update', 'update-available')
-          }
-        })
-
-        autoUpdater.on('update-not-available', () => {
-          if (this.mainWindow) {
-            this.mainWindow.webContents.send('auto-update', 'update-not-available')
-          }
-        })
-
-        autoUpdater.on('update-downloaded', () => {
-          if (this.mainWindow) {
-            this.mainWindow.webContents.send('auto-update', 'update-downloaded')
-
-            setTimeout(() => {
-              autoUpdater.quitAndInstall()
-            }, 2000)
-          }
-        })
-
-        autoUpdater.on('download-progress', (progress) => {
-          if (this.mainWindow) {
-            this.mainWindow.webContents.send('auto-update-progress', progress.percent.toFixed(2))
-          }
-        })
-
-        autoUpdater.on('error', (error) => {
-          if (this.mainWindow) {
-            this.mainWindow.webContents.send('auto-update', `Update error: ${error.toString()}`)
-          }
-        })
-      })
     }
   }
 }

@@ -81,28 +81,34 @@ function AutoUpdateScreen(): JSX.Element {
     setProgress(progress)
   }
 
-  async function sendUpdateRequest() {
-    if (updateRequestSent) return
-    if (window.api && typeof window.api.send === 'function') {
-      await window.api.send('auto-update-start', null)
-      await setUpdateRequestSent(true)
-    }
-  }
   useEffect(() => {
+    async function sendUpdateRequest() {
+      if (!updateRequestSent) {
+        if (window.api && typeof window.api.send === 'function') {
+          await window.api.send('auto-update-start', Date.now())
+          await setUpdateRequestSent(true)
+        } else {
+          console.error('No window.api.send function')
+        }
+      }
+    }
+
     sendUpdateRequest()
 
+    // Setup IPC message listeners
     if (window.api && typeof window.api.receive === 'function') {
       window.api.receive('auto-update', handleUpdateMessage)
       window.api.receive('auto-update-progress', handleProgressUpdate)
     }
 
+    // Cleanup
     return () => {
       if (window.api && typeof window.api.removeListener === 'function') {
         window.api.removeListener('auto-update', handleUpdateMessage)
         window.api.removeListener('auto-update-progress', handleProgressUpdate)
       }
     }
-  }, [])
+  }, []) // Empty dependency array ensures this runs once on component mount
 
   return (
     <>
