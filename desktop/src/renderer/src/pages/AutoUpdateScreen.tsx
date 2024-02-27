@@ -1,21 +1,21 @@
-import { useAuth } from '@renderer/lib/authContext'
-import instance from '@renderer/lib/axios'
-import { Button } from '@renderer/shadcn/components/ui/button'
-import { Progress } from '@renderer/shadcn/components/ui/progress'
-import { Loader } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@renderer/lib/authContext'
+import instance from '@renderer/lib/axios'
+import { Progress } from '@renderer/shadcn/components/ui/progress'
+import { Loader } from 'lucide-react'
+import { Button } from '@renderer/shadcn/components/ui/button'
+import getRedirectPathFromRole from '@renderer/utils/getRedirectPathFromRole'
 
-const update_messages = {
+const updateMessages = {
   'checking-for-update': 'Sprawdzanie dostępności aktualizacji...',
   'update-available': 'Aktualizacja jest dostępna. Trwa pobieranie...',
   'update-not-available': 'Aplikacja jest aktualna. Trwa uruchamianie...',
   'update-downloaded': 'Aktualizacja pobrana, instalowanie...'
 }
 
-function AutoUpdateScreen(): JSX.Element {
-  // @ts-ignore
-  const { userDataContext, setUserDataContext } = useAuth()
+function AutoUpdateScreen() {
+  const { setUserDataContext } = useAuth()
   const [updateMessage, setUpdateMessage] = useState('...')
   const [progress, setProgress] = useState(0)
   const [showProgress, setShowProgress] = useState(false)
@@ -35,80 +35,65 @@ function AutoUpdateScreen(): JSX.Element {
 
     try {
       const token = localStorage.getItem('token')
-      if (!token) {
-        await navigate('/login', { replace: true })
-        return
-      }
+      if (!token) return navigate('/login', { replace: true, state: { verification_error: true } })
 
       const response = await instance.get('/auth/verify')
-      if (response.status === 200) {
-        await setUserDataContext(response.data.user)
-        await navigate('/home', { replace: true })
-      } else {
-        await localStorage.removeItem('token')
-        await navigate('/login', { replace: true, state: { verification_error: true } })
-      }
+      if (response.status !== 200) throw new Error('Verification failed')
 
-      return
-    } catch (error: any) {
+      setUserDataContext(response.data.user)
+      const path = getRedirectPathFromRole(response.data.user.role)
+      navigate(path, { replace: true })
+    } catch (error) {
       console.error('Error fetching user info', error)
-      setAuthError({ status: true, message: error.message })
+      localStorage.removeItem('token')
+
+      setAuthError({
+        status: true,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
     } finally {
       setAuthLoaded(true)
+    }
+  }
 
+  const handleUpdateMessage = (message) => {
+    setUpdateMessage(updateMessages[message] || message)
+    if (message === 'update-available') setShowProgress(true)
+    else if (message === 'update-not-available') {
       if (window.api && typeof window.api.send === 'function') {
         window.api.send('resize', { width: 1200, height: 900 })
       }
-    }
-  }
 
-  const handleUpdateMessage = async (message: string) => {
-    switch (message) {
-      case 'update-available':
-        await setUpdateMessage(update_messages[message])
-        await setShowProgress(true)
-        break
-      case 'update-not-available':
-        await setUpdateComplete(true)
-        await fetchUserInfo()
-        break
-      default:
-        setUpdateMessage(update_messages[message] || message)
-    }
-  }
+      setUpdateComplete(true)
 
-  const handleProgressUpdate = (progress: number) => {
-    setProgress(progress)
+      fetchUserInfo()
+    }
   }
 
   useEffect(() => {
     async function sendUpdateRequest() {
-      if (!updateRequestSent) {
-        if (window.api && typeof window.api.send === 'function') {
-          await window.api.send('auto-update-start', Date.now())
-          await setUpdateRequestSent(true)
-        } else {
-          console.error('No window.api.send function')
-        }
+      if (!updateRequestSent && window.api?.send) {
+        window.api.send('auto-update-start', Date.now())
+        setUpdateRequestSent(true)
       }
     }
 
     sendUpdateRequest()
 
-    // Setup IPC message listeners
-    if (window.api && typeof window.api.receive === 'function') {
+    if (window.api?.receive) {
       window.api.receive('auto-update', handleUpdateMessage)
-      window.api.receive('auto-update-progress', handleProgressUpdate)
+      window.api.receive('auto-update-progress', (progress) => {
+        setProgress(progress)
+      })
     }
 
-    // Cleanup
     return () => {
-      if (window.api && typeof window.api.removeListener === 'function') {
+      if (window.api?.removeListener) {
         window.api.removeListener('auto-update', handleUpdateMessage)
-        window.api.removeListener('auto-update-progress', handleProgressUpdate)
+        window.api.removeListener('auto-update-progress', () => {})
       }
     }
-  }, []) // Empty dependency array ensures this runs once on component mount
+  }, [updateRequestSent]) // Include updateRequestSent in the dependency array if its changes should trigger the effect
 
   return (
     <>
@@ -157,5 +142,7 @@ function AutoUpdateScreen(): JSX.Element {
     </>
   )
 }
+
+// Consider extracting components such as LoaderScreen and ErrorScreen for better readability and separation of concerns
 
 export default AutoUpdateScreen

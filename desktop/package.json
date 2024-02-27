@@ -1,6 +1,6 @@
 {
   "name": "masystent",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "mAsystent - Opis aplikacji",
   "main": "./out/main/index.js",
   "author": "Firma Monkiewicz",

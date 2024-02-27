@@ -25,6 +25,7 @@ import {
 } from '@renderer/shadcn/components/ui/form'
 import instance from '@renderer/lib/axios'
 import { useAuth } from '@renderer/lib/authContext'
+import getRedirectPathFromRole from '@renderer/utils/getRedirectPathFromRole'
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Nieprawidłowy adres email.' }), // Custom message for email validation
@@ -57,7 +58,8 @@ export default function AuthenticationPage() {
         await localStorage.setItem('token', response.data.accessToken)
         await setUserDataContext(response.data.user)
         await setLoading(false)
-        await navigate('/home', { replace: true })
+        let path = getRedirectPathFromRole(response.data.user.role)
+        await navigate(path, { replace: true })
       } else {
         await setLoading(false)
         await setError(response.data.message || 'Wystąpił błąd. Spróbuj ponownie.')
