@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, globalShortcut, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, globalShortcut, ipcMain, Notification } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -19,6 +19,7 @@ class MainWindow {
       height: 600,
       minWidth: 600,
       minHeight: 600,
+      resizable: false,
 
       show: false,
       autoHideMenuBar: true,
@@ -31,6 +32,7 @@ class MainWindow {
     })
 
     this.mainWindow.removeMenu()
+
     this.mainWindow.on('ready-to-show', () => {
       this.mainWindow?.show()
       this.mainWindow?.focus()
@@ -58,23 +60,33 @@ class MainWindow {
 
     if (is.dev) {
       ipcMain.on('auto-update-start', () => {
+        this.mainWindow?.setResizable(true)
+
         this.mainWindow?.webContents.send('auto-update', 'update-not-available')
       })
       return
     }
     ipcMain.on('auto-update-start', () => {
       this.mainWindow?.webContents.send('auto-update', 'checking-for-update')
-      autoUpdater.checkForUpdatesAndNotify()
+      autoUpdater.checkForUpdates()
 
       autoUpdater.on('update-available', () => {
         this.mainWindow?.webContents.send('auto-update', 'update-available')
       })
 
       autoUpdater.on('update-not-available', () => {
+        this.mainWindow?.setResizable(true)
+
         this.mainWindow?.webContents.send('auto-update', 'update-not-available')
       })
 
       autoUpdater.on('update-downloaded', () => {
+        let notification = new Notification({
+          icon: icon,
+          title: 'Aplikacja mAsystent została zaktualizowana!',
+          body: 'Za chwilę zostanie zainstalowana nowa wersja aplikacji.'
+        })
+        notification.show()
         this.mainWindow?.webContents.send('auto-update', 'update-downloaded')
 
         setTimeout(() => {
@@ -83,7 +95,7 @@ class MainWindow {
       })
 
       autoUpdater.on('download-progress', (progress) => {
-        this.mainWindow?.webContents.send('auto-update-progress', progress.percent.toFixed(2))
+        this.mainWindow?.webContents.send('auto-update-progress', progress.percent.toFixed(0))
       })
 
       autoUpdater.on('error', (error) => {

@@ -3,7 +3,7 @@ import { HashRouter as Router, Route, Routes } from 'react-router-dom'
 import AutoUpdateScreen from './pages/AutoUpdateScreen' // Assuming this is your component
 import HomeScreen from './pages/HomeScreen'
 import LoginScreen from './pages/LoginScreen'
-import AdminPanel from './pages/AdminPanel'
+import AdminPanel from './pages/adminPanel/panel'
 import { AuthProvider } from './lib/authContext'
 
 const App: React.FC = () => {

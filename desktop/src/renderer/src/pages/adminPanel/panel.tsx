@@ -1,7 +1,8 @@
 import { useAuth } from '@renderer/lib/authContext'
 
-function HomeScreen(): JSX.Element {
+function AdminPanel(): JSX.Element {
   const { userDataContext, logout } = useAuth()
+
   return (
     <div className="w-screen h-screen bg-orange-50 flex text-center items-center">
       <div className="text-6xl font-semibold text-neutral-800 w-full flex flex-col gap-5">
@@ -20,4 +21,4 @@ function HomeScreen(): JSX.Element {
   )
 }
 
-export default HomeScreen
+export default AdminPanel

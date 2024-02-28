@@ -35,7 +35,7 @@ function AutoUpdateScreen() {
 
     try {
       const token = localStorage.getItem('token')
-      if (!token) return navigate('/login', { replace: true, state: { verification_error: true } })
+      if (!token) return navigate('/login', { replace: true })
 
       const response = await instance.get('/auth/verify')
       if (response.status !== 200) throw new Error('Verification failed')
@@ -46,7 +46,7 @@ function AutoUpdateScreen() {
     } catch (error) {
       console.error('Error fetching user info', error)
       localStorage.removeItem('token')
-
+      navigate('/login', { replace: true, state: { verification_error: true } })
       setAuthError({
         status: true,
         message: error instanceof Error ? error.message : 'Unknown error'
@@ -104,6 +104,7 @@ function AutoUpdateScreen() {
             <div className="">
               <span className="text-orange-600">m</span>Asystent
             </div>
+
             <p className="text-xl font-normal text-neutral-400">{updateMessage}</p>
             {showProgress && (
               <div className="w-1/3 mx-auto text-xl">
