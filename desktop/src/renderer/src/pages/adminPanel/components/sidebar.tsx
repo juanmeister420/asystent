@@ -18,6 +18,17 @@ import {
   Users2
 } from 'lucide-react'
 import { Separator } from '@renderer/shadcn/components/ui/separator'
+import { useAuth } from '@renderer/lib/authContext'
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@renderer/shadcn/components/ui/dropdown-menu'
+import { Avatar, AvatarFallback, AvatarImage } from '@renderer/shadcn/components/ui/avatar'
 
 interface SidebarLinks {
   title: string
@@ -30,37 +41,37 @@ type SidebarLink = SidebarLinks[]
 
 const links: SidebarLink = [
   {
-    title: 'Inbox',
-    label: '128',
+    title: 'Strona Główna',
+    label: '',
     icon: Inbox,
     variant: 'default'
   },
   {
-    title: 'Drafts',
-    label: '9',
+    title: 'Dodaj Serwis',
+    label: '',
     icon: File,
     variant: 'ghost'
   },
   {
-    title: 'Sent',
+    title: 'Lista Serwisów',
     label: '',
     icon: Send,
     variant: 'ghost'
   },
   {
-    title: 'Junk',
-    label: '23',
+    title: 'Dodaj Pytanie',
+    label: '',
     icon: ArchiveX,
     variant: 'ghost'
   },
   {
-    title: 'Trash',
+    title: 'Baza Pytań',
     label: '',
     icon: Trash2,
     variant: 'ghost'
   },
   {
-    title: 'Archive',
+    title: 'Statystyki',
     label: '',
     icon: Archive,
     variant: 'ghost'
@@ -71,7 +82,7 @@ export function Sidebar({ isCollapsed }) {
   return (
     <div
       data-collapsed={isCollapsed}
-      className="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2"
+      className="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2 "
     >
       <div
         className={cn(
@@ -79,17 +90,12 @@ export function Sidebar({ isCollapsed }) {
           isCollapsed ? 'h-[52px]' : 'px-2'
         )}
       >
-        {isCollapsed ? (
-          <h1 className="text-2xl font-bold text-orange-600">
-            m<span className="text-neutral-800">A</span>
-          </h1>
-        ) : (
-          <h1 className="text-2xl font-bold text-orange-600">
-            m<span className="text-neutral-800">Asystent</span>
-          </h1>
-        )}
+        <h1 className="text-2xl font-bold text-orange-600">
+          m<span className="text-neutral-800">{isCollapsed ? 'A' : 'Asystent'}</span>
+        </h1>
       </div>
       <Separator />
+
       <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
         {links.map((link, index) =>
           isCollapsed ? (
@@ -140,6 +146,21 @@ export function Sidebar({ isCollapsed }) {
           )
         )}
       </nav>
+
+      {/* <DropdownMenu>
+        <DropdownMenuTrigger asChild className="cursor-pointer">
+          <Avatar>
+            <AvatarImage src="https://github.com/shadcn.png" />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>Moje Konto</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>Ustawienia</DropdownMenuItem>
+          <DropdownMenuItem>Wyloguj</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu> */}
     </div>
   )
 }
