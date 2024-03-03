@@ -13,16 +13,16 @@ type StatCardProps = {
 export default function statCard(props: StatCardProps) {
   const { title, data, icon, details } = props
   return (
-    <Card className="shadow-md">
+    <Card className="rounded-2xl shadow-xl">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 ">
-        <CardTitle className="text-lg font-medium text-neutral-600">{title}</CardTitle>
-        <div className="h-10 w-10 rounded-full bg-orange-200 items-center justify-center flex">
+        <CardTitle className="text-xl font-medium text-neutral-600">{title}</CardTitle>
+        <div className="h-12 w-12 rounded-full bg-orange-200 items-center justify-center flex">
           {icon}
         </div>
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold text-neutral-800">{data}</div>
-        {details && <div className="text-sm text-neutral-400 mt-4">{details}</div>}
+        {details && <div className="text-base text-neutral-400 mt-4">{details}</div>}
       </CardContent>
     </Card>
   )

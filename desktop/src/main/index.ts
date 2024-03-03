@@ -17,8 +17,7 @@ class MainWindow {
     this.mainWindow = new BrowserWindow({
       width: 600,
       height: 600,
-      minWidth: 600,
-      minHeight: 600,
+
       resizable: false,
 
       show: false,
@@ -58,6 +57,11 @@ class MainWindow {
       }
     })
 
+    ipcMain.on('fullscreen', () => {
+      this.mainWindow?.maximize()
+      this.mainWindow?.setMinimumSize(800, 600)
+    })
+
     if (is.dev) {
       ipcMain.on('auto-update-start', () => {
         this.mainWindow?.setResizable(true)
@@ -75,8 +79,6 @@ class MainWindow {
       })
 
       autoUpdater.on('update-not-available', () => {
-        this.mainWindow?.setResizable(true)
-
         this.mainWindow?.webContents.send('auto-update', 'update-not-available')
       })
 

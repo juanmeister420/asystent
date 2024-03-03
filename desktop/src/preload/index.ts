@@ -4,7 +4,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 const secureApi = {
   send: (channel, data) => {
     // List of channels you allow the renderer process to send messages to
-    const validChannels = ['resize', 'auto-update-start']
+    const validChannels = ['resize', 'auto-update-start', 'fullscreen']
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data)
     }
