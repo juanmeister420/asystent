@@ -1,13 +1,13 @@
-import { PrismaClient } from "@prisma/client";
 import { compare, hash } from "bcrypt";
 import { Application, Request, Response } from "express";
 
 import { sign } from "jsonwebtoken";
 import { body, validationResult } from "express-validator";
+import prisma from "../prisma_connector";
 
 const BCRYPT_SALT_ROUNDS = 12;
 
-module.exports = (app: Application, prisma: PrismaClient) => {
+module.exports = (app: Application) => {
   app.post(
     "/auth/register",
     [

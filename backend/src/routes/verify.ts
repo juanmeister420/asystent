@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
-
 import { Application, Request, Response } from "express";
 
 import { sign, verify } from "jsonwebtoken";
+import prisma from "../prisma_connector";
 
 interface decodedToken {
   id: string;
@@ -10,7 +9,7 @@ interface decodedToken {
   exp: number;
 }
 
-module.exports = (app: Application, prisma: PrismaClient) => {
+module.exports = (app: Application) => {
   app.get("/auth/verify", async (req: Request, res: Response) => {
     const token = req.headers.authorization?.split(" ")[1];
 

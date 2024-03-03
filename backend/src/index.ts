@@ -1,10 +1,10 @@
-import { Prisma, PrismaClient } from "@prisma/client";
 import express from "express";
 import { readdirSync } from "fs";
 import helmet from "helmet";
 import cors from "cors";
 
-const prisma = new PrismaClient();
+import prisma from "./prisma_connector";
+
 const app = express();
 
 app.use(express.json());
