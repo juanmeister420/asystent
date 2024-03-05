@@ -1,5 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/shadcn/components/ui/tooltip'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@renderer/shadcn/components/ui/utils'
 import { buttonVariants } from '@renderer/shadcn/components/ui/button'
 import {
@@ -34,7 +34,7 @@ interface SidebarLinks {
   title: string
   label: string
   icon: LucideIcon
-  variant: 'default' | 'ghost'
+  href?: string
 }
 
 type SidebarLink = SidebarLinks[]
@@ -44,41 +44,40 @@ const links: SidebarLink = [
     title: 'Strona Główna',
     label: '',
     icon: Inbox,
-    variant: 'default'
+    href: '/admin/panel/home'
   },
   {
     title: 'Dodaj Serwis',
     label: '',
-    icon: File,
-    variant: 'ghost'
+    icon: File
   },
   {
     title: 'Lista Serwisów',
     label: '',
     icon: Send,
-    variant: 'ghost'
+    href: '/admin/panel/list/all'
   },
   {
     title: 'Dodaj Pytanie',
     label: '',
-    icon: ArchiveX,
-    variant: 'ghost'
+    icon: ArchiveX
   },
   {
     title: 'Baza Pytań',
     label: '',
-    icon: Trash2,
-    variant: 'ghost'
+    icon: Trash2
   },
   {
     title: 'Statystyki',
     label: '',
-    icon: Archive,
-    variant: 'ghost'
+    icon: Archive
   }
 ]
 
 export function Sidebar({ isCollapsed }) {
+  const { pathname } = useLocation()
+
+  console.log(pathname)
   return (
     <div
       data-collapsed={isCollapsed}
@@ -102,11 +101,14 @@ export function Sidebar({ isCollapsed }) {
             <Tooltip key={index} delayDuration={0}>
               <TooltipTrigger asChild>
                 <Link
-                  to="#"
+                  to={link.href || '#'}
                   className={cn(
-                    buttonVariants({ variant: link.variant, size: 'icon' }),
+                    buttonVariants({
+                      variant: pathname === link.href ? 'default' : 'ghost',
+                      size: 'icon'
+                    }),
                     'h-9 w-9',
-                    link.variant === 'default' &&
+                    pathname === link.href &&
                       'dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white'
                   )}
                 >
@@ -122,10 +124,13 @@ export function Sidebar({ isCollapsed }) {
           ) : (
             <Link
               key={index}
-              to="#"
+              to={link.href || '#'}
               className={cn(
-                buttonVariants({ variant: link.variant, size: 'sm' }),
-                link.variant === 'default' &&
+                buttonVariants({
+                  variant: pathname === link.href ? 'default' : 'ghost',
+                  size: 'sm'
+                }),
+                pathname === link.href &&
                   'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white',
                 'justify-start'
               )}
@@ -136,7 +141,7 @@ export function Sidebar({ isCollapsed }) {
                 <span
                   className={cn(
                     'ml-auto',
-                    link.variant === 'default' && 'text-background dark:text-white'
+                    pathname === link.href && 'text-background dark:text-white'
                   )}
                 >
                   {link.label}
