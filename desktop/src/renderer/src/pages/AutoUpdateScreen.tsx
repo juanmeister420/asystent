@@ -101,9 +101,8 @@ function AutoUpdateScreen() {
         <div className="w-screen h-screen bg-orange-50 flex text-center items-center">
           <div className="text-6xl font-semibold text-neutral-800 w-full flex flex-col gap-5">
             <p className="text-2xl font-thin text-orange-600">Firma Monkiewicz</p>
-            <div className="">
-              <span className="text-orange-600">m</span>Asystent
-            </div>
+
+            <span className="first-letter:text-orange-600">mAsystent</span>
 
             <p className="text-xl font-normal text-neutral-400">{updateMessage}</p>
             {showProgress && (

@@ -2,33 +2,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/shadcn/compon
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@renderer/shadcn/components/ui/utils'
 import { buttonVariants } from '@renderer/shadcn/components/ui/button'
-import {
-  AlertCircle,
-  Archive,
-  ArchiveX,
-  File,
-  Inbox,
-  LucideIcon,
-  MessagesSquare,
-  PenBox,
-  Search,
-  Send,
-  ShoppingCart,
-  Trash2,
-  Users2
-} from 'lucide-react'
+import { Archive, ArchiveX, File, Inbox, LucideIcon, Send, Trash2 } from 'lucide-react'
 import { Separator } from '@renderer/shadcn/components/ui/separator'
-import { useAuth } from '@renderer/lib/authContext'
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@renderer/shadcn/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback, AvatarImage } from '@renderer/shadcn/components/ui/avatar'
 
 interface SidebarLinks {
   title: string
