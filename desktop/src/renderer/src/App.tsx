@@ -7,6 +7,7 @@ import AdminPanel from './pages/adminPanel/home'
 import AdminPanelList from './pages/adminPanel/list'
 import { AuthProvider } from './lib/authContext'
 import AdminPanelLayout from './layouts/adminPanel/layout'
+import AdminPanelAddQuestion from './pages/adminPanel/addQuestion'
 
 const App: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const App: React.FC = () => {
           <Route element={<AdminPanelLayout />}>
             <Route path="/admin/panel/home" element={<AdminPanel />} />
             <Route path="/admin/panel/list/:type" element={<AdminPanelList />} />
+            <Route path="/admin/panel/add/question" element={<AdminPanelAddQuestion />} />
           </Route>
           {/* <Route path="/admin/panel/home" element={<AdminPanel />} />
           <Route path="/admin/panel/list/:type" element={<AdminPanel />} />

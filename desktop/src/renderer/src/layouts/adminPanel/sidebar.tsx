@@ -35,7 +35,8 @@ const links: SidebarLink = [
   {
     title: 'Dodaj Pytanie',
     label: '',
-    icon: ArchiveX
+    icon: ArchiveX,
+    href: '/admin/panel/add/question'
   },
   {
     title: 'Baza Pytań',
