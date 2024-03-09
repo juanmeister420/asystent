@@ -1,4 +1,4 @@
-import { Inbox } from 'lucide-react'
+import { FileImage, FilePen, Trash2 } from 'lucide-react'
 
 import { Input } from '@renderer/shadcn/components/ui/input'
 import { Label } from '@renderer/shadcn/components/ui/label'
@@ -8,18 +8,42 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue
 } from '@renderer/shadcn/components/ui/select'
 import { Textarea } from '@renderer/shadcn/components/ui/textarea'
+import { useState } from 'react'
 
 function AdminPanelAddQuestion(): JSX.Element {
+  const [imageFileName, setImageFileName] = useState('')
+  const [instructionFileName, setInstructionFileName] = useState('')
+
+  const handleImageChange = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      setImageFileName(file.name)
+    }
+  }
+
+  const handleInstructionChange = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      setInstructionFileName(file.name)
+    }
+  }
+
+  const removeImageFile = () => {
+    setImageFileName('')
+  }
+
+  const removeInstructionFile = () => {
+    setInstructionFileName('')
+  }
   return (
     <div className="p-8">
       <h1 className="text-3xl text-gray-800 mb-6">Dodaj Nowe Pytanie</h1>
 
-      <form className="grid grid-cols-1 gap-6 md:px-24 lg:px-36 xl:px-72">
+      <form className="grid grid-cols-1 gap-6 md:px-24 lg:px-36 xl:px-96">
         <div className="flex flex-row gap-5">
           <div className="w-full">
             <Label htmlFor="questionName">Nazwa Pytania</Label>
@@ -34,16 +58,15 @@ function AdminPanelAddQuestion(): JSX.Element {
             <Label htmlFor="questionCategory">Kategoria</Label>
             <Select>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select a fruit" />
+                <SelectValue placeholder="Wybierz kategorię" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Fruits</SelectLabel>
-                  <SelectItem value="apple">Apple</SelectItem>
-                  <SelectItem value="banana">Banana</SelectItem>
-                  <SelectItem value="blueberry">Blueberry</SelectItem>
-                  <SelectItem value="grapes">Grapes</SelectItem>
-                  <SelectItem value="pineapple">Pineapple</SelectItem>
+                  <SelectItem value="pcmarket">PCMarket</SelectItem>
+                  <SelectItem value="kasa_fiskalna">Kasa Fiskalna</SelectItem>
+                  <SelectItem value="drukarka_fiskalna">Drukarka Fiskalna</SelectItem>
+                  <SelectItem value="terminal">Terminal Płatniczy</SelectItem>
+                  <SelectItem value="other">Inne</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -57,38 +80,62 @@ function AdminPanelAddQuestion(): JSX.Element {
 
         <div className="flex flex-row gap-5">
           <div className="w-1/2">
-            <Label htmlFor="fileUpload">Zdjęcie / Film</Label>
+            <Label htmlFor="imageUpload">Zdjęcie / Film</Label>
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
               <div className="space-y-1 text-center">
-                <Inbox className="mx-auto h-12 w-12 text-gray-400" />
+                <FileImage className="mx-auto h-12 w-12 text-orange-600" />
                 <div className="flex text-sm text-gray-600">
                   <label
-                    htmlFor="fileUpload"
-                    className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none"
+                    htmlFor="imageUpload"
+                    className="relative cursor-pointer border border-orange-600 rounded-md font-medium text-orange-600 focus-within:outline-none p-2"
                   >
                     <span>Wybierz Plik</span>
-                    <input id="fileUpload" name="fileUpload" type="file" className="sr-only" />
+                    <input
+                      id="imageUpload"
+                      name="imageUpload"
+                      type="file"
+                      className="sr-only"
+                      onChange={handleImageChange}
+                      accept=".jpg,.jpeg,.png,.gif,.mp4"
+                    />
                   </label>
+                  {imageFileName && (
+                    <button onClick={removeImageFile} className="ml-2">
+                      <Trash2 className="text-orange-600" />
+                    </button>
+                  )}
                 </div>
-                <p className="text-xs text-gray-500">Plik z Instrukcją</p>
+                <p className="text-xs text-gray-500">{imageFileName || '.jpg, .png, .gif, .mp4'}</p>
               </div>
             </div>
           </div>
           <div className="w-1/2">
-            <Label htmlFor="fileUpload">Plik z instrukcją</Label>
+            <Label htmlFor="instructionUpload">Plik z instrukcją</Label>
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
               <div className="space-y-1 text-center">
-                <Inbox className="mx-auto h-12 w-12 text-gray-400" />
+                <FilePen className="mx-auto h-12 w-12 text-orange-600" />
                 <div className="flex text-sm text-gray-600">
                   <label
-                    htmlFor="fileUpload"
-                    className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none"
+                    htmlFor="instructionUpload"
+                    className="relative cursor-pointer border border-orange-600 rounded-md font-medium text-orange-600 focus-within:outline-none p-2"
                   >
                     <span>Wybierz Plik</span>
-                    <input id="fileUpload" name="fileUpload" type="file" className="sr-only" />
+                    <input
+                      id="instructionUpload"
+                      name="instructionUpload"
+                      type="file"
+                      className="sr-only"
+                      onChange={handleInstructionChange}
+                      accept=".pdf,.md"
+                    />
                   </label>
+                  {instructionFileName && (
+                    <button onClick={removeInstructionFile}>
+                      <Trash2 className="text-orange-600" />
+                    </button>
+                  )}
                 </div>
-                <p className="text-xs text-gray-500">Plik z Instrukcją</p>
+                <p className="text-xs text-gray-500">{instructionFileName || '.pdf, .md'}</p>
               </div>
             </div>
           </div>
