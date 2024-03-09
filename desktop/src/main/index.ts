@@ -18,7 +18,7 @@ class MainWindow {
       width: 600,
       height: 600,
 
-      resizable: false,
+      resizable: true,
 
       show: false,
       autoHideMenuBar: true,
@@ -59,14 +59,12 @@ class MainWindow {
 
     ipcMain.on('fullscreen', () => {
       this.mainWindow?.maximize()
+      this.mainWindow?.center()
       this.mainWindow?.setMinimumSize(800, 600)
-      this.mainWindow?.setResizable(true)
     })
 
     if (is.dev) {
       ipcMain.on('auto-update-start', () => {
-        this.mainWindow?.setResizable(false)
-
         this.mainWindow?.webContents.send('auto-update', 'update-not-available')
       })
       return
