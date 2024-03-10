@@ -25,7 +25,7 @@ function AdminPanelLayout(): JSX.Element {
   }, [])
 
   return (
-    <div className="w-screen h-screen bg-orange-50 flex flex-col">
+    <div className="w-screen min-h-screen bg-orange-50 flex flex-col p-0 m-0">
       <TooltipProvider delayDuration={0}>
         <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
           <ResizablePanel

@@ -61,7 +61,7 @@ function AdminPanel(): JSX.Element {
   }, [])
 
   return (
-    <div className="grid grid-cols-12 px-24 py-12 ">
+    <div className="grid grid-cols-12 px-24 py-12 h-full ">
       <div className="col-span-12">
         <h1 className="text-3xl font-bold">Lista serwisów</h1>
       </div>

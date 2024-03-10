@@ -35,7 +35,7 @@ export const columns: ColumnDef<SerwisListProps>[] = [
   {
     accessorKey: 'company_name',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Nazwa Firmy" />,
-    cell: ({ row }) => <div className="w-[120px]">{row.getValue('company_name')}</div>,
+    cell: ({ row }) => <div className="w-[150px]">{row.getValue('company_name')}</div>,
     enableSorting: false,
     enableHiding: false
   },
@@ -54,7 +54,7 @@ export const columns: ColumnDef<SerwisListProps>[] = [
   {
     accessorKey: 'nip',
     header: ({ column }) => <DataTableColumnHeader column={column} title="NIP" />,
-    cell: ({ row }) => <div className="w-[120px] font-bold">{row.getValue('nip')}</div>,
+    cell: ({ row }) => <div className="w-[80px] font-bold">{row.getValue('nip')}</div>,
     enableSorting: false,
     enableHiding: false
 
@@ -67,14 +67,14 @@ export const columns: ColumnDef<SerwisListProps>[] = [
   {
     accessorKey: 'email',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
-    cell: ({ row }) => <div className="w-[120px]">{row.getValue('email')}</div>,
+    cell: ({ row }) => <div className="w-[180px]">{row.getValue('email')}</div>,
     enableSorting: false,
     enableHiding: true
   },
   {
     accessorKey: 'phone_number',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Telefon" />,
-    cell: ({ row }) => <div className="w-[120px]">{row.getValue('phone_number')}</div>,
+    cell: ({ row }) => <div className="w-[90px]">{row.getValue('phone_number')}</div>,
     enableSorting: false,
     enableHiding: true
   },
@@ -83,7 +83,9 @@ export const columns: ColumnDef<SerwisListProps>[] = [
     accessorKey: 'total_shop',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Liczba Sklepów" />,
     cell: ({ row }) => (
-      <div className="w-[50px] font-bold text-orange-600">{row.getValue('total_shop')}</div>
+      <div className="w-[100px] font-bold text-orange-600 text-center">
+        {row.getValue('total_shop')}
+      </div>
     ),
     enableSorting: true,
     enableHiding: true
